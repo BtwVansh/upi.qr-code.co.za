@@ -1,0 +1,56 @@
+{
+  "name": "upi-pay-qr",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Universal UPI payment QR generator with optional authorised UPI Number resolution.",
+  "scripts": {
+    "dev": "next dev",
+    "dev:stack": "concurrently -k -n db,web \"npm:db:start\" \"npm:dev\"",
+    "build": "prisma generate && next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "smoke": "tsx scripts/smoke.ts",
+    "db:start": "tsx scripts/dev-db.ts start",
+    "db:stop": "tsx scripts/dev-db.ts stop",
+    "db:status": "tsx scripts/dev-db.ts status",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate deploy",
+    "retention": "tsx scripts/retention.ts"
+  },
+  "dependencies": {
+    "@prisma/client": "6.19.3",
+    "next": "15.5.28",
+    "qrcode": "1.5.4",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "server-only": "^0.0.1",
+    "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "24.10.1",
+    "@types/qrcode": "1.5.6",
+    "@types/react": "19.2.7",
+    "@types/react-dom": "19.2.3",
+    "autoprefixer": "10.4.22",
+    "concurrently": "9.2.1",
+    "dotenv": "17.2.3",
+    "embedded-postgres": "17.11.0-beta.19",
+    "postcss": "8.5.6",
+    "prisma": "6.19.3",
+    "tailwindcss": "3.4.17",
+    "tsx": "4.20.6",
+    "typescript": "5.9.3",
+    "vitest": "3.2.4"
+  },
+  "allowScripts": {
+    "@embedded-postgres/windows-x64@17.11.0-beta.19": true,
+    "@prisma/client@6.19.3": true,
+    "@prisma/engines@6.19.3": true,
+    "esbuild@0.25.12": true,
+    "esbuild@0.28.2": true,
+    "prisma@6.19.3": true
+  }
+}

@@ -1,0 +1,110 @@
+// UPI Pay QR — Prisma schema
+// PostgreSQL only. Personal fields are stored encrypted at the application
+// layer; blind indexes (HMAC) allow lookups without decrypting every row.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum InputType {
+  PHONE
+  UPI
+  INVALID
+}
+
+enum ResolutionStatus {
+  PENDING
+  RESOLVED
+  NOT_FOUND
+  UNAVAILABLE
+  FAILED
+  NOT_REQUIRED
+}
+
+enum VerificationStatus {
+  PENDING
+  VERIFIED
+  UNVERIFIED
+  NOT_FOUND
+  FAILED
+  NOT_REQUESTED
+}
+
+enum GenerationStatus {
+  SUCCESS
+  FAILED
+}
+
+enum ProviderKind {
+  RESOLUTION
+  VERIFICATION
+}
+
+model PaymentRequest {
+  id                  String   @id @default(cuid())
+  requestId           String   @unique @db.VarChar(40)
+  originalInputEnc    String   @db.Text
+  originalInputHash   String   @db.VarChar(64)
+  normalizedValueEnc  String?  @db.Text
+  normalizedHash      String?  @db.VarChar(64)
+  inputType           InputType
+  createdAt           DateTime @default(now())
+  expiresAt           DateTime
+
+  resolutionStatus    ResolutionStatus   @default(NOT_REQUIRED)
+  verificationStatus  VerificationStatus @default(NOT_REQUESTED)
+  resolvedUpiIdEnc    String?            @db.Text
+  resolvedUpiIdHash   String?            @db.VarChar(64)
+  beneficiaryNameEnc  String?            @db.Text
+  beneficiaryVerified Boolean            @default(false)
+
+  provider            String?  @db.VarChar(80)
+  providerResponseCode String? @db.VarChar(80)
+  providerReferenceEnc String? @db.Text
+  providerMetadataEnc String?  @db.Text
+
+  errorCode           String?  @db.VarChar(80)
+  errorMessageEnc     String?  @db.Text
+
+  paymentUriStatus    GenerationStatus @default(FAILED)
+  qrStatus            GenerationStatus @default(FAILED)
+  processingMs        Int              @default(0)
+
+  ipHash              String? @db.VarChar(64)
+  userAgentEnc        String? @db.Text
+
+  events              ProviderAttempt[]
+
+  @@index([createdAt])
+  @@index([expiresAt])
+  @@index([inputType, createdAt])
+  @@index([originalInputHash])
+  @@index([normalizedHash])
+}
+
+/// Technical audit trail for provider calls and failures. Deliberately does not
+/// store the raw provider payload or any credentials.
+model ProviderAttempt {
+  id               String        @id @default(cuid())
+  paymentRequestId String?
+  requestId        String        @db.VarChar(40)
+  kind             ProviderKind
+  provider         String        @db.VarChar(80)
+  outcome          String        @db.VarChar(40)
+  httpStatus       Int?
+  responseCode     String?       @db.VarChar(80)
+  errorCode        String?       @db.VarChar(80)
+  errorMessageEnc  String?       @db.Text
+  durationMs       Int
+  createdAt        DateTime      @default(now())
+
+  paymentRequest   PaymentRequest? @relation(fields: [paymentRequestId], references: [id], onDelete: Cascade)
+
+  @@index([requestId])
+  @@index([createdAt])
+}
