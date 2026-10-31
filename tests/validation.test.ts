@@ -1,35 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
-  classifyInput,
-  normalizeIndianMobile,
+  MAX_UPI_ID_LENGTH,
   parseAmount,
   parseNote,
   validateUpiId,
 } from "@/lib/validation";
-
-describe("normalizeIndianMobile", () => {
-  it.each([
-    ["9876543210", "9876543210"],
-    ["+91 98765 43210", "9876543210"],
-    ["91-98765-43210", "9876543210"],
-    ["09876543210", "9876543210"],
-    ["(98765) 43210", "9876543210"],
-    ["  9123456780  ", "9123456780"],
-  ])("normalizes %s", (input, expected) => {
-    expect(normalizeIndianMobile(input)).toBe(expected);
-  });
-
-  it.each([
-    "5876543210",
-    "12345",
-    "98765432100",
-    "+1 9876543210",
-    "98765abcde",
-    "",
-  ])("rejects %s", (input) => {
-    expect(normalizeIndianMobile(input)).toBeNull();
-  });
-});
 
 describe("validateUpiId", () => {
   it.each([
@@ -39,12 +14,13 @@ describe("validateUpiId", () => {
     "shop-name@paytm",
     "a_b@oksbi",
     "  Demo@UPI  ",
+    "ABCD@UPI",
   ])("accepts %s", (input) => {
     expect(validateUpiId(input).valid).toBe(true);
   });
 
-  it("lowercases the normalized VPA", () => {
-    expect(validateUpiId("Demo@UPI").vpa).toBe("demo@upi");
+  it("lowercases the canonical VPA", () => {
+    expect(validateUpiId("ABCD@UPI").vpa).toBe("abcd@upi");
   });
 
   it.each([
@@ -62,44 +38,12 @@ describe("validateUpiId", () => {
   ])("rejects %s", (input) => {
     expect(validateUpiId(input).valid).toBe(false);
   });
-});
 
-describe("classifyInput", () => {
-  it("classifies Indian mobile numbers", () => {
-    const result = classifyInput("+91 98765 43210");
-    expect(result.type).toBe("PHONE");
-    if (result.type === "PHONE") {
-      expect(result.nationalNumber).toBe("9876543210");
-      expect(result.normalized).toBe("+919876543210");
-    }
-  });
-
-  it("classifies UPI IDs", () => {
-    const result = classifyInput(" Merchant@UPI ");
-    expect(result.type).toBe("UPI");
-    if (result.type === "UPI") expect(result.vpa).toBe("merchant@upi");
-  });
-
-  it("rejects malformed UPI IDs with a UPI-specific message", () => {
-    const result = classifyInput("not-an-id@");
-    expect(result.type).toBe("INVALID");
-    if (result.type === "INVALID") {
-      expect(result.reason).toBe("upi");
-      expect(result.message.length).toBeGreaterThan(10);
-    }
-  });
-
-  it("rejects Indian numbers starting with 1-5", () => {
-    const result = classifyInput("5876543210");
-    expect(result.type).toBe("INVALID");
-    if (result.type === "INVALID") {
-      expect(result.message).toContain("start with 6");
-    }
-  });
-
-  it("rejects empty and unrelated input", () => {
-    expect(classifyInput("").type).toBe("INVALID");
-    expect(classifyInput("hello there").type).toBe("INVALID");
+  it("rejects empty and over-long input", () => {
+    expect(validateUpiId("").valid).toBe(false);
+    expect(validateUpiId(`${"a".repeat(MAX_UPI_ID_LENGTH)}@upi`).valid).toBe(
+      false,
+    );
   });
 });
 

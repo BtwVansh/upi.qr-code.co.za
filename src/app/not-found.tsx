@@ -17,15 +17,15 @@ export default function NotFound() {
         404 · Link unavailable
       </p>
       <h1 className="mt-3 text-balance text-[32px] font-semibold leading-tight tracking-[-0.04em] sm:text-[40px]">
-        This payment link isn&apos;t available.
+        This UPI link isn&apos;t valid.
       </h1>
       <p className="mt-4 max-w-sm text-[14px] leading-relaxed text-muted">
-        It may be mistyped or expired. Payment requests are automatically
-        deleted after the retention period. Ask the sender for a new link.
+        The UPI ID in this URL may be mistyped or incomplete. Ask the sender for
+        the link again, or generate a new QR code.
       </p>
       <Link href="/" className="btn-primary mt-7 !px-5 !py-3">
         <ArrowLeftIcon className="h-4 w-4" />
-        Create a new payment QR
+        Create a new UPI QR
       </Link>
       <p className="mt-6 text-[11px] text-muted">
         Never share your UPI PIN or OTP with anyone.

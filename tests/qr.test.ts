@@ -1,36 +1,40 @@
 import { describe, expect, it } from "vitest";
-import { generateQrPng } from "@/lib/qr";
+import { generateQrDataUrl } from "@/lib/qr";
 import { buildUpiUri } from "@/lib/upi";
 
-describe("generateQrPng", () => {
-  it("renders a PNG buffer for a UPI payment URI", async () => {
+function pngFromDataUrl(dataUrl: string): Buffer {
+  const [, base64] = dataUrl.split(",", 2);
+  return Buffer.from(base64, "base64");
+}
+
+describe("generateQrDataUrl", () => {
+  it("renders a PNG data URL for a UPI payment URI", async () => {
     const uri = buildUpiUri({
       payeeVpa: "merchant@upi",
-      payeeName: "Demo Merchant",
       amount: "49.00",
       note: "Coffee",
     });
-    const png = await generateQrPng(uri, 640);
+    const dataUrl = await generateQrDataUrl(uri, 640);
 
-    expect(Buffer.isBuffer(png)).toBe(true);
+    expect(dataUrl.startsWith("data:image/png;base64,")).toBe(true);
+    const png = pngFromDataUrl(dataUrl);
     expect(png.byteLength).toBeGreaterThan(500);
     expect(png.subarray(0, 8)).toEqual(
       Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
     );
-    // PNG IHDR width at byte offset 16 (big-endian).
+    // PNG IHDR width/height at byte offsets 16 and 20 (big-endian).
     expect(png.readUInt32BE(16)).toBe(640);
     expect(png.readUInt32BE(20)).toBe(640);
   });
 
-  it("accepts long note values without breaking", async () => {
-    const png = await generateQrPng(
+  it("accepts the maximum note length", async () => {
+    const dataUrl = await generateQrDataUrl(
       buildUpiUri({
         payeeVpa: "merchant@upi",
-        payeeName: "A".repeat(99),
         amount: "100000",
         note: "N".repeat(50),
       }),
     );
-    expect(png.byteLength).toBeGreaterThan(500);
+    expect(dataUrl).toContain("image/png");
   });
 });

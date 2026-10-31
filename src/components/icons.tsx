@@ -35,15 +35,6 @@ export function AtSignIcon(props: IconProps) {
   );
 }
 
-export function PhoneIcon(props: IconProps) {
-  return (
-    <svg {...base(props)}>
-      <rect x="6.5" y="2.5" width="11" height="19" rx="3" />
-      <path d="M10.5 18.5h3" />
-    </svg>
-  );
-}
-
 export function ArrowRightIcon(props: IconProps) {
   return (
     <svg {...base(props)}>
@@ -190,10 +181,11 @@ export function WalletIcon(props: IconProps) {
   );
 }
 
-export function LogoutIcon(props: IconProps) {
+export function ShareIcon(props: IconProps) {
   return (
     <svg {...base(props)}>
-      <path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4M10 8l-4 4 4 4M6 12h9" />
+      <path d="M12 3v12M8 6l4-3 4 3" />
+      <path d="M6 11H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-1" />
     </svg>
   );
 }

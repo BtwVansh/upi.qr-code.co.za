@@ -1,21 +1,36 @@
 import QRCode from "qrcode";
 
+const QR_OPTIONS = {
+  errorCorrectionLevel: "M" as const,
+  margin: 2,
+  color: {
+    dark: "#0B0B0F",
+    light: "#FFFFFF",
+  },
+};
+
 /**
- * Renders the UPI URI to a PNG buffer. Error correction level M keeps the code
- * scannable while allowing moderate print/screen imperfections.
+ * Generates a PNG data URL in the browser (or in a Node test environment).
+ * The caller supplies the UPI payment URI, never the website URL.
  */
-export async function generateQrPng(
+export async function generateQrDataUrl(
   payload: string,
-  width = 640,
-): Promise<Buffer> {
-  return QRCode.toBuffer(payload, {
-    type: "png",
-    errorCorrectionLevel: "M",
-    margin: 2,
+  width = 1024,
+): Promise<string> {
+  return QRCode.toDataURL(payload, {
+    ...QR_OPTIONS,
+    type: "image/png",
     width,
-    color: {
-      dark: "#0B0B0F",
-      light: "#FFFFFF",
-    },
   });
+}
+
+/** Triggers a PNG download without a server endpoint. */
+export function downloadDataUrl(dataUrl: string, filename: string): void {
+  const link = document.createElement("a");
+  link.href = dataUrl;
+  link.download = filename;
+  link.rel = "noopener";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 }
