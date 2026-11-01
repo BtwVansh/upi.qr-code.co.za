@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     template: "%s · UPI Pay QR",
   },
   description:
-    "Generate a UPI payment QR code and a permanent shareable link from your UPI ID. Frontend-only, no signup and no database.",
+    "Generate a UPI payment QR code and a shareable link from your UPI ID. The QR page is rebuilt from the URL. Frontend-only, no signup and no database.",
   applicationName: "UPI Pay QR",
   keywords: ["UPI", "UPI QR", "UPI ID", "payment link", "share UPI", "India"],
   openGraph: {

@@ -1,11 +1,11 @@
-import Link from "next/link";
 import { QrIcon } from "@/components/icons";
+import { withBasePath } from "@/lib/site";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 export function SiteHeader() {
   return (
     <header className="relative z-20 mx-auto flex w-full max-w-6xl items-center justify-between px-5 py-5 sm:px-8">
-      <Link href="/" className="group flex items-center gap-2.5 rounded-2xl">
+      <a href={withBasePath("/")} className="group flex items-center gap-2.5 rounded-2xl">
         <span className="flex h-9 w-9 items-center justify-center rounded-[11px] bg-gradient-to-br from-[#0a84ff] to-[#5e5ce6] text-white shadow-[0_8px_20px_-8px_rgba(0,113,227,0.8)] transition-transform duration-300 group-hover:scale-105">
           <QrIcon className="h-[18px] w-[18px]" />
         </span>
@@ -17,7 +17,7 @@ export function SiteHeader() {
             QR
           </span>
         </span>
-      </Link>
+      </a>
 
       <div className="flex items-center gap-2">
         <span className="hidden items-center gap-1.5 rounded-full border border-line bg-surface px-3 py-1.5 text-[11px] font-medium text-muted sm:inline-flex">

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import {
   AlertTriangleIcon,
   ArrowRightIcon,
@@ -14,11 +13,11 @@ import {
   DISCLAIMER_PARAGRAPHS,
   DISCLAIMER_TITLE,
 } from "@/lib/disclaimer";
+import { withBasePath } from "@/lib/site";
 import { buildPaymentPagePath } from "@/lib/upi";
 import { validateUpiId } from "@/lib/validation";
 
 export function HomeForm() {
-  const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
   const agreeRef = useRef<HTMLButtonElement>(null);
   const [input, setInput] = useState("");
@@ -69,9 +68,11 @@ export function HomeForm() {
 
   function agreeAndGenerate() {
     if (!pendingVpa) return;
-    const path = buildPaymentPagePath(pendingVpa);
+    const path = withBasePath(buildPaymentPagePath(pendingVpa));
     setPendingVpa(null);
-    router.push(path);
+    // Full navigation lets GitHub Pages serve the static 404 fallback, which
+    // reconstructs the payment page from the URL.
+    window.location.assign(path);
   }
 
   return (

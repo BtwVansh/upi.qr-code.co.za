@@ -12,7 +12,7 @@ import {
 describe("buildUpiUri", () => {
   it("builds a fully encoded standard UPI payment URI", () => {
     const uri = buildUpiUri({ payeeVpa: "ABCD@UPI" });
-    expect(uri).toBe("upi://pay?pa=abcd%40upi&cu=INR");
+    expect(uri).toBe("upi://pay?pa=ABCD%40UPI&cu=INR");
     expect(uri).toContain("%40");
     expect(uri).not.toContain("@");
   });
@@ -56,8 +56,8 @@ describe("buildUpiUri", () => {
 });
 
 describe("permanent payment page URLs", () => {
-  it("encodes the UPI ID in the path", () => {
-    expect(buildPaymentPagePath("ABCD@UPI")).toBe("/pay/abcd%40upi");
+  it("encodes the UPI ID in the path and preserves its casing", () => {
+    expect(buildPaymentPagePath("ABCD@UPI")).toBe("/pay/ABCD%40UPI");
   });
 
   it("adds optional amount and note as query parameters", () => {
@@ -71,12 +71,12 @@ describe("permanent payment page URLs", () => {
     expect(url.searchParams.get("note")).toBe("Rent");
   });
 
-  it("builds an absolute shareable URL", () => {
+  it("builds an absolute shareable URL under the GitHub Pages base path", () => {
     expect(
       buildPaymentPageUrl("https://pay.example", "merchant@upi", {
         amount: "49",
       }),
-    ).toBe("https://pay.example/pay/merchant%40upi?amount=49.00");
+    ).toBe("https://pay.example/upi-gen/pay/merchant%40upi?amount=49.00");
   });
 
   it("omits invalid optional values", () => {
@@ -95,8 +95,8 @@ describe("decodeUpiIdSegment", () => {
     expect(decodeUpiIdSegment("abcd@upi")).toBe("abcd@upi");
   });
 
-  it("normalizes case", () => {
-    expect(decodeUpiIdSegment("ABCD%40UPI")).toBe("abcd@upi");
+  it("preserves case", () => {
+    expect(decodeUpiIdSegment("ABCD%40UPI")).toBe("ABCD@UPI");
   });
 
   it("rejects malformed route segments", () => {

@@ -1,3 +1,4 @@
+import { withBasePath } from "@/lib/site";
 import {
   MAX_NOTE_LENGTH,
   parseAmount,
@@ -120,7 +121,7 @@ function appendPaymentQuery(
 }
 
 /**
- * Relative path for the permanent QR page, e.g. `/pay/name%40bank`.
+ * Relative path for the reusable QR page, e.g. `/pay/name%40bank`.
  * The UPI ID lives in the path so the page can be rebuilt from the URL alone.
  */
 export function buildPaymentPagePath(
@@ -138,13 +139,16 @@ export function buildPaymentPagePath(
   return `/pay/${encodeParam(validation.vpa)}${query ? `?${query}` : ""}`;
 }
 
-/** Absolute shareable URL for the permanent QR page. */
+/**
+ * Absolute shareable URL for the reusable QR page, including the deployment
+ * base path (for example `https://example.com/upi-gen/pay/name%40bank`).
+ */
 export function buildPaymentPageUrl(
   origin: string,
   upiId: string,
   options?: { amount?: string | null; note?: string | null },
 ): string {
-  return new URL(buildPaymentPagePath(upiId, options), origin).toString();
+  return new URL(withBasePath(buildPaymentPagePath(upiId, options)), origin).toString();
 }
 
 /** Android intent targeting one specific payment app. */

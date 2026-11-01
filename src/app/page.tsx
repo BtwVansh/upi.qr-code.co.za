@@ -15,8 +15,8 @@ const steps = [
     icon: AtSignIcon,
   },
   {
-    title: "Generate one permanent link",
-    body: "Your UPI ID is encoded in the shareable URL, so the QR page can be rebuilt whenever it is opened.",
+    title: "Generate one reusable link",
+    body: "Your UPI ID is encoded in the shareable URL, so the QR page can be rebuilt from it for as long as this site stays online.",
     icon: QrIcon,
   },
   {

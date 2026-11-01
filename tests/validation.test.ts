@@ -19,8 +19,9 @@ describe("validateUpiId", () => {
     expect(validateUpiId(input).valid).toBe(true);
   });
 
-  it("lowercases the canonical VPA", () => {
-    expect(validateUpiId("ABCD@UPI").vpa).toBe("abcd@upi");
+  it("preserves the entered casing in the VPA", () => {
+    expect(validateUpiId("ABCD@UPI").vpa).toBe("ABCD@UPI");
+    expect(validateUpiId("  Demo@OKAXIS  ").vpa).toBe("Demo@OKAXIS");
   });
 
   it.each([

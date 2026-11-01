@@ -9,8 +9,8 @@ export const MAX_UPI_ID_LENGTH = 320;
 export const MAX_NOTE_LENGTH = 50;
 export const MAX_AMOUNT = 100_000;
 
-const UPI_LOCAL_PART = /^[a-z0-9](?:[a-z0-9._-]{0,253}[a-z0-9])?$/;
-const UPI_HANDLE = /^[a-z][a-z0-9-]{1,63}$/;
+const UPI_LOCAL_PART = /^[A-Za-z0-9](?:[A-Za-z0-9._-]{0,253}[A-Za-z0-9])?$/;
+const UPI_HANDLE = /^[A-Za-z][A-Za-z0-9-]{1,63}$/;
 
 export interface UpiValidation {
   valid: boolean;
@@ -20,9 +20,9 @@ export interface UpiValidation {
 }
 
 /**
- * Validates a UPI ID (VPA). UPI IDs are treated case-insensitively, so the
- * canonical value is lowercased. This keeps the URL, QR payload and copied
- * value consistent.
+ * Validates a UPI ID (VPA). Validation is case-insensitive, but the original
+ * casing is preserved in the returned VPA. Preserving the entered value keeps
+ * the URL, QR payload and copied UPI ID identical to what the recipient typed.
  */
 export function validateUpiId(raw: string): UpiValidation {
   const value = raw.trim();
@@ -43,9 +43,7 @@ export function validateUpiId(raw: string): UpiValidation {
     };
   }
 
-  const [localRaw, handleRaw] = value.split("@");
-  const local = localRaw.toLowerCase();
-  const handle = handleRaw.toLowerCase();
+  const [local, handle] = value.split("@");
 
   if (local.length < 2 || local.length > 255) {
     return { valid: false, reason: "The part before @ must be 2–255 characters." };

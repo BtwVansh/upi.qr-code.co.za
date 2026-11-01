@@ -1,326 +1,199 @@
-# UPI Link
+# UPI Pay QR
 
-### Your UPI. One Link.
+**Your UPI. One Link.**
 
-UPI Link is a lightweight web application for creating shareable UPI
-payment pages. Enter a UPI ID to generate a scannable QR code and a
-unique link that can be shared with anyone. Visitors who open that link
-can view the same payment QR code and choose a supported UPI
-application.
+A completely static UPI QR generator for GitHub Pages.
 
-> **Project status:** Independent project. Payment-app launching and
-> compatibility depend on the device, browser, installed application and
-> the payment application's supported URL schemes.
+Production site:
 
-```{=html}
-<!-- Replace this comment with a screenshot or demo GIF once available. -->
+```text
+https://btwvansh.github.io/upi-gen/
 ```
-```{=html}
-<!-- ![UPI Link screenshot](docs/screenshot.png) -->
-```
-## Features
 
--   **UPI ID validation** before generating a payment page.
--   **UPI payment URI generation** using the recipient's UPI ID.
--   **QR code generation** for compatible UPI payment applications.
--   **Shareable payment pages** with a URL derived from the UPI ID.
--   **URL-based QR reconstruction:** the payment page rebuilds the QR
-    code from the UPI ID in its route.
--   **Google Pay, PhonePe and Paytm launch options**, subject to
-    platform and application support.
--   Copy the recipient's UPI ID.
--   Copy and share the payment-page URL.
--   Download the QR code as a PNG image.
--   Native sharing where the browser supports the Web Share API.
--   Responsive layouts for mobile and desktop.
--   Light and dark appearance, where implemented.
--   No application database or custom backend is required for the
-    URL-based page-generation approach.
+Enter a UPI ID, review the disclaimer, and get a shareable payment page at:
+
+```text
+https://btwvansh.github.io/upi-gen/pay/ABCD%40OKAXIS
+```
+
+The payment page is reconstructed entirely from that URL. There is no backend,
+database, account, API, server-side storage or per-QR image file.
+
+---
 
 ## How it works
 
-1.  Enter a UPI ID on the homepage.
-2.  Review and accept the project's disclaimer.
-3.  The application validates the UPI ID and creates a UPI payment URI.
-4.  A QR code is generated in the browser.
-5.  The application creates a shareable payment-page URL.
-6.  Anyone opening that URL can view the reconstructed QR code and
-    available payment-app options.
+1. Enter a UPI ID on the homepage.
+2. Press **Generate QR Code** and review the disclaimer.
+3. Choose **Agree & Generate QR**.
+4. The browser validates the UPI ID and opens the static payment route.
+5. The payment page reads the UPI ID from the URL path, decodes it, rebuilds the
+   UPI payment URI and generates the QR code in the browser.
+6. Visitors can scan the QR, open Google Pay, PhonePe or Paytm, copy the UPI ID,
+   copy the payment URI, download the QR as PNG, copy the shareable link or use
+   the native share sheet.
 
-### Example
+The QR contains the **UPI payment URI**, never the website URL:
 
-Given this UPI ID:
-
-``` text
-ABCD@UPI
+```text
+upi://pay?pa=ABCD%40OKAXIS&cu=INR
 ```
 
-A corresponding payment page could look like:
+Optional `amount` and `note` query parameters are also reflected in both the QR
+code and the shareable URL.
 
-``` text
-https://yourdomain.com/pay/ABCD%40UPI
+## Static routing on GitHub Pages
+
+The site is a Next.js static export:
+
+```bash
+npm run build
 ```
 
-The route contains the encoded UPI ID. When the page is opened, the
-application decodes the route, rebuilds the UPI payment URI and renders
-the QR code. The QR image does not need to be saved in a database.
+The output is written to `out/`. It contains:
 
-**Link availability:** A generated URL remains usable while the domain,
-hosting, application and route implementation remain available. It is
-not a separately stored or guaranteed permanent file.
+- `out/index.html` — homepage at `/upi-gen/`
+- `out/pay/index.html` — the static payment shell at `/upi-gen/pay/`
+- `out/404.html` — GitHub Pages fallback used for arbitrary payment URLs
+- `out/_next/...` — scripts, styles and assets under `/upi-gen/_next/...`
+- `out/.nojekyll` — keeps GitHub Pages from ignoring the `_next` directory
 
-## Payment URI and QR codes
+GitHub Pages cannot serve arbitrary Next.js dynamic routes. It does, however,
+serve `404.html` for paths that do not map to a file. For a request such as:
 
-UPI Link generates a payment URI using the standard UPI payment-link
-structure. A basic example is:
-
-``` text
-upi://pay?pa=ABCD%40UPI&cu=INR
+```text
+https://btwvansh.github.io/upi-gen/pay/ABCD%40OKAXIS
 ```
 
--   `pa` identifies the payee's UPI ID.
--   `cu` specifies the currency, typically INR.
+GitHub Pages serves `out/404.html` with a 404 status while keeping the browser
+URL unchanged. The exported fallback reads `window.location.pathname`, decodes
+the UPI ID, and renders the payment page. Refreshing, bookmarking, opening in
+another browser, or opening on another device all follow the same path.
 
-The QR code should encode the **UPI payment URI**, not the website's
-shareable URL. The website URL opens the payment page; the QR code
-carries the payment details for a compatible UPI application to read.
+The static export is configured with `basePath: "/upi-gen"` in
+`next.config.ts`. All Next.js assets and the manual links in the app include
+this base path. To deploy under a different project path, set
+`NEXT_PUBLIC_BASE_PATH` at build time; it is used by both `next.config.ts` and
+the client code.
 
-A syntactically valid UPI ID is not proof that the ID is active,
-verified or controlled by the intended recipient. Always verify the
-payee details shown by the payment application before authorizing a
-transaction.
+## Quick start
 
-## Payment application integration
+Requirements: Node.js 20+ and npm.
 
-The payment page provides dedicated options for:
-
--   Google Pay
--   PhonePe
--   Paytm
-
-Selecting an option attempts to open the corresponding application with
-the payment details prefilled, where the device, browser and application
-support the required link or intent.
-
-Compatibility is not universal:
-
--   Android and iOS may require different app-link or URL-scheme
-    handling.
--   A browser cannot reliably determine every application installed on a
-    device.
--   An application may change or restrict its supported URL schemes.
--   If an app cannot be opened, the QR code remains available to scan
-    from a compatible UPI application.
-
-Payment details must be reviewed and the payment must be authorized by
-the user inside their chosen payment application. UPI Link does not
-initiate or authorize payments itself.
-
-## Technology
-
-UPI Link is intended to run as a frontend application, with payment
-pages reconstructed from URL data rather than database records.
-
-The exact framework, QR-generation package, styling tools and routing
-implementation depend on the repository's current implementation. See
-the project's source files and package manifest for the authoritative
-dependency list.
-
-> **Maintainer note:** Update this section with the exact framework and
-> libraries used by the repository before publishing if you want a fully
-> specific technology inventory. Do not list packages that the project
-> does not actually use.
-
-## Getting started
-
-### Prerequisites
-
-Install the runtime and package manager required by the project's
-framework. For a Node.js-based project, this will usually mean
-installing a supported Node.js LTS release.
-
-### Clone the repository
-
-``` bash
-git clone https://github.com/<your-username>/<your-repository>.git
-cd <your-repository>
-```
-
-Replace the placeholder repository URL with the actual GitHub repository
-URL.
-
-### Install dependencies
-
-Use the package manager that matches the lockfile in the repository:
-
-``` bash
+```bash
 npm install
-```
-
-If the repository uses another package manager, use its corresponding
-install command instead.
-
-### Run locally
-
-For a typical npm-based development setup:
-
-``` bash
 npm run dev
 ```
 
-Open the local URL printed by the development server, commonly:
+Open:
 
-``` text
-http://localhost:3000
+```text
+http://localhost:3000/upi-gen/
 ```
 
-The exact commands are determined by the scripts in `package.json`.
-Check that file if these example commands do not match the project.
+The dev server serves the app under the same base path. The payment fallback is
+handled by the app's 404 route during development.
+
+Production build:
+
+```bash
+npm run build
+```
+
+Then serve the contents of `out/` with a static host that is configured to serve
+`out/404.html` for unknown paths. GitHub Pages does this automatically. A plain
+static server configured to fall back to `index.html` will not reproduce the
+payment-link routing.
+
+Checks:
+
+```bash
+npm run typecheck
+npm test
+```
+
+On Windows PowerShell, use `npm.cmd` if `npm.ps1` is blocked by the execution
+policy.
+
+## URL encoding
+
+- The UPI ID is stored in the path, for example `/pay/ABCD%40OKAXIS`.
+- `@` is encoded as `%40`.
+- The UPI ID is encoded exactly once when the URL is created and decoded exactly
+  once when the page is opened. Double-encoded IDs are rejected.
+- The entered casing is preserved. UPI validation is case-insensitive, but the
+  application does not lower-case the ID in the URL or QR code.
+- Amount and note values are encoded once in the query string and once in the
+  UPI URI. The resulting QR payload uses percent-encoded parameters.
+
+## Payment-app launching
+
+| App | Android package | iOS scheme |
+| --- | --- | --- |
+| Google Pay | `com.google.android.apps.nbu.paisa.user` | `gpay://upi/pay?...` |
+| PhonePe | `com.phonepe.app` | `phonepe://pay?...` |
+| Paytm | `net.one97.paytm` | `paytmmp://pay?...` |
+
+- **Android:** each button uses an app-specific `intent://` URL with the package
+  name above. A `browser_fallback_url` points back to the current payment page.
+- **iOS:** each button uses that app's URL scheme. The Google Pay scheme is
+  documented in Google's Google Pay for India iOS integration guide.
+- **Desktop:** the buttons remain visible, but tapping one explains that UPI
+  apps run on phones and the QR code should be scanned instead.
+
+The browser cannot reliably detect whether a custom scheme was handled. After a
+tap, the page shows guidance for the case where the app did not open and keeps
+the QR code visible. No payment is ever initiated automatically and no UPI PIN,
+OTP or banking credential is collected.
+
+## Privacy and limitations
+
+- No website database and no backend API.
+- No phone-number lookup, provider, resolver or verification service.
+- No cookies or local/session storage are used to store submitted UPI IDs. The
+  theme toggle stores only the visitor's colour preference.
+- The UPI ID is part of the URL, so the page can be reconstructed anywhere.
+- Hosting providers, browsers and network infrastructure may retain technical
+  access logs such as IP addresses, timestamps and requested URLs. The app does
+  not claim otherwise.
+- A URL remains reproducible only while the domain, hosting and this application
+  remain available. There is no permanent-storage guarantee.
+- Passing format validation does not prove that a UPI ID is active or belongs to
+  the intended person. UPI applications display the beneficiary name; check it
+  before paying.
+- Payment-app schemes and packages can change. If an app does not open, scan the
+  QR code or update the app.
 
 ## Project structure
 
-The exact directory structure depends on the framework and current
-repository. Common areas in a frontend project may include:
-
-  Area                 Responsibility
-  -------------------- --------------------------------------------------------
-  Application routes   Homepage and dynamic payment-page routes
-  Components           Input, disclaimer, QR display and payment controls
-  Utilities            UPI validation, URI construction and platform handling
-  Public assets        Static icons, images and other public files
-  Styles               Global styles, themes and responsive presentation
-
-Refer to the repository itself for the authoritative file and directory
-structure.
-
-## Permanent payment links
-
-Payment pages are reconstructed from the UPI ID encoded in the URL. This
-avoids needing a database to save every generated QR code.
-
-For example:
-
-``` text
-/pay/ABCD%40UPI
+```text
+src/
+  app/
+    page.tsx                 Homepage
+    pay/page.tsx             Static payment-page shell
+    not-found.tsx            GitHub Pages 404 fallback
+  components/
+    home-form.tsx            UPI input + disclaimer modal
+    payment-route.tsx        Reads the payment page from the URL
+    payment-view.tsx         QR, app buttons, copy/download/share
+    not-found-view.tsx       Invalid-link screen
+  lib/
+    site.ts                  /upi-gen base-path helpers
+    payment-route.ts         URL pathname/query parsing
+    upi.ts                   UPI URI, URL encoding, app intents/schemes
+    validation.ts            UPI ID, amount and note rules
+    qr.ts                    Browser-side QR data URL and download
+    disclaimer.ts            Required notice copy
+public/
+  .nojekyll                  Required for GitHub Pages `_next` assets
+tests/                       Vitest suites
+out/                         Generated by `npm run build`
 ```
 
-When this route loads, the application should:
+## Deployment note
 
-1.  Read the route parameter.
-2.  Decode and validate the UPI ID.
-3.  Construct the UPI payment URI.
-4.  Generate the QR code.
-5.  Render the recipient's payment page.
-
-The hosting platform must support direct navigation to the dynamic
-route. Test a copied payment URL in a fresh browser tab and refresh it
-to confirm that the host serves the application correctly.
-
-## Privacy and security
-
-UPI Link is designed not to maintain an application database or
-intentionally store submitted UPI IDs.
-
-Keep the following points in mind:
-
--   No user account is required for the URL-based workflow.
--   The UPI ID is part of the generated payment-page URL.
--   URLs may appear in browser history, shared messages, screenshots,
-    referrer data or technical hosting logs.
--   Hosting providers, browsers and network infrastructure may retain
-    technical logs according to their own policies.
--   Never enter or share a UPI PIN, OTP, banking password or other
-    payment authentication secret on this website.
--   Treat the UPI ID in a URL as untrusted input and validate it before
-    constructing a payment URI.
--   Verify the recipient and amount inside the payment application
-    before authorizing payment.
-
-## Disclaimer
-
-UPI Link is an independent project intended to generate UPI payment QR
-codes and shareable payment pages. It is not affiliated with, endorsed
-by or operated by the National Payments Corporation of India (NPCI),
-Google Pay, PhonePe, Paytm or any bank.
-
-UPI Link does not hold funds, process transactions, authorize payments,
-verify ownership of UPI IDs or guarantee that a UPI ID is active.
-Payment processing and authorization take place through third-party
-payment applications and their respective payment networks.
-
-Users are responsible for checking that the UPI ID and recipient details
-are correct before sharing a payment page or authorizing a transaction.
-The project maintainers are not responsible for incorrect details
-entered by users, payments sent to unintended recipients, failed
-transactions, or issues with third-party applications or services.
-
-## Deployment
-
-Deploy the application to a hosting provider that supports the framework
-and routing strategy used by the repository.
-
-### Deployment checklist
-
--   Connect the GitHub repository to the hosting provider.
--   Select the correct framework preset, build command and output
-    settings.
--   Configure any required environment variables (if the project uses
-    them).
--   Confirm that the homepage loads.
--   Open a generated `/pay/...` URL directly in a new tab.
--   Refresh a generated payment page and confirm that it still loads.
--   Test the generated link on a second device.
--   Test payment-app links on supported Android and iOS devices.
-
-For a Next.js application, a platform such as Vercel can support dynamic
-routes without requiring a separate database. Follow the hosting
-provider's current Next.js deployment instructions and verify the
-deployed route behaviour.
-
-## Contributing
-
-Contributions, bug reports and suggestions are welcome.
-
-1.  Fork the repository.
-
-2.  Create a feature branch:
-
-    ``` bash
-    git checkout -b feature/your-change
-    ```
-
-3.  Make your changes.
-
-4.  Run the available checks and test the relevant user flows.
-
-5.  Commit your changes:
-
-    ``` bash
-    git commit -m "Describe your change"
-    ```
-
-6.  Push your branch and open a pull request.
-
-For significant changes, open an issue first to discuss the proposed
-approach.
-
-## License
-
-No license is specified in this README. Check the repository for a
-`LICENSE` file and add the applicable license information here once the
-project owner has selected and added one.
-
-Unless a license is included in the repository, do not assume that
-others have permission to use, modify or distribute the code.
-
-## Acknowledgements
-
--   The UPI ecosystem and the payment applications that support UPI
-    payments.
--   The maintainers of the open-source libraries used by this project.
--   Contributors and users who report issues and help improve the
-    application.
-
-Google Pay, PhonePe, Paytm, UPI and related names and marks belong to
-their respective owners. Their names are used only to identify
-compatible third-party payment applications and services.
+Deploy the **contents of `out/`** to the GitHub Pages project site so that
+`out/index.html` becomes `/upi-gen/index.html` and `out/404.html` becomes
+`/upi-gen/404.html`. Do not deploy the repository root or the `.next` directory.
+No GitHub Actions, repository, account or publishing configuration is set up by
+this project.

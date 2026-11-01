@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { LockIcon } from "@/components/icons";
+import { withBasePath } from "@/lib/site";
 
 export function SiteFooter() {
   return (
@@ -17,12 +17,18 @@ export function SiteFooter() {
           </p>
         </div>
         <nav className="flex flex-wrap items-center gap-x-5 gap-y-2">
-          <Link href="/#how-it-works" className="transition-colors hover:text-ink">
+          <a
+            href={withBasePath("/#how-it-works")}
+            className="transition-colors hover:text-ink"
+          >
             How it works
-          </Link>
-          <Link href="/#privacy" className="transition-colors hover:text-ink">
+          </a>
+          <a
+            href={withBasePath("/#privacy")}
+            className="transition-colors hover:text-ink"
+          >
             Privacy
-          </Link>
+          </a>
         </nav>
       </div>
       <p className="mt-6 text-[11px] text-muted">

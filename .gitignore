@@ -14,10 +14,6 @@ next-env.d.ts
 .env.local
 .env.*.local
 
-# local embedded PostgreSQL data
-/.pgdata
-/.pgdata-*
-
 # testing / logs
 /coverage
 *.log

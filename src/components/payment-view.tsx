@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import Link from "next/link";
 import {
   AlertTriangleIcon,
   ArrowLeftIcon,
@@ -16,6 +15,7 @@ import {
   ShieldCheckIcon,
 } from "@/components/icons";
 import { downloadDataUrl, generateQrDataUrl } from "@/lib/qr";
+import { withBasePath } from "@/lib/site";
 import {
   PAYMENT_APPS,
   buildAppLaunchUrl,
@@ -245,15 +245,16 @@ export function PaymentView({
     return `If ${name} didn't open, install or update it, then try again. You can also scan the QR code above.`;
   })();
 
-  const displayShareUrl = shareUrl || `/pay/${encodeURIComponent(upiId)}`;
+  const displayShareUrl =
+    shareUrl || withBasePath(`/pay/${encodeURIComponent(upiId)}`);
 
   return (
     <div className="mx-auto w-full max-w-5xl px-5 pb-10 pt-2 sm:px-8 sm:pt-6">
       <div className="mb-4 flex items-center justify-between gap-3">
-        <Link href="/" className="btn-ghost !pl-2">
+        <a href={withBasePath("/")} className="btn-ghost !pl-2">
           <ArrowLeftIcon className="h-4 w-4" />
           New QR
-        </Link>
+        </a>
         <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-muted">
           <LockIcon className="h-3.5 w-3.5" />
           Nothing is paid automatically
