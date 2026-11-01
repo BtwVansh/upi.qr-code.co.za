@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { parsePaymentRoute } from "@/lib/payment-route";
 import { stripBasePath, withBasePath } from "@/lib/site";
+import { buildPaymentPagePath, buildUpiUri } from "@/lib/upi";
 
 describe("GitHub Pages base path", () => {
   it("prefixes app paths", () => {
@@ -70,5 +71,47 @@ describe("parsePaymentRoute", () => {
 
   it("rejects a double-encoded UPI ID", () => {
     expect(parsePaymentRoute("/upi-gen/pay/ABCD%2540OKAXIS")).toBeNull();
+  });
+
+  it("round-trips a payment URL back into the exact UPI payment URI", () => {
+    const href = withBasePath(buildPaymentPagePath("ABCD@OKAXIS"));
+    const route = parsePaymentRoute(href);
+
+    expect(href).toBe("/upi-gen/pay/ABCD%40OKAXIS");
+    expect(route?.upiId).toBe("ABCD@OKAXIS");
+    expect(buildUpiUri({ payeeVpa: route!.upiId })).toBe(
+      "upi://pay?pa=ABCD%40OKAXIS&cu=INR",
+    );
+  });
+
+  it("round-trips amount and note through the share URL", () => {
+    const href = withBasePath(
+      buildPaymentPagePath("ABCD@OKAXIS", {
+        amount: "125.5",
+        note: "Dinner & tea",
+      }),
+    );
+    const route = parsePaymentRoute(href);
+    const search = href.slice(href.indexOf("?"));
+    const withQuery = parsePaymentRoute(
+      "/upi-gen/pay/ABCD%40OKAXIS",
+      search,
+    );
+
+    expect(route).toBeNull(); // parsePaymentRoute takes pathname + search separately
+    expect(withQuery).toEqual({
+      upiId: "ABCD@OKAXIS",
+      amount: "125.50",
+      note: "Dinner & tea",
+    });
+    expect(
+      buildUpiUri({
+        payeeVpa: withQuery!.upiId,
+        amount: withQuery!.amount,
+        note: withQuery!.note,
+      }),
+    ).toBe(
+      "upi://pay?pa=ABCD%40OKAXIS&am=125.50&cu=INR&tn=Dinner%20%26%20tea",
+    );
   });
 });

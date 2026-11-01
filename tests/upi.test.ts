@@ -55,7 +55,7 @@ describe("buildUpiUri", () => {
   });
 });
 
-describe("permanent payment page URLs", () => {
+describe("reusable payment page URLs", () => {
   it("encodes the UPI ID in the path and preserves its casing", () => {
     expect(buildPaymentPagePath("ABCD@UPI")).toBe("/pay/ABCD%40UPI");
   });

@@ -14,7 +14,7 @@ const UPI_HANDLE = /^[A-Za-z][A-Za-z0-9-]{1,63}$/;
 
 export interface UpiValidation {
   valid: boolean;
-  /** Lowercase, canonical UPI ID when valid. */
+  /** Trimmed UPI ID with its original casing when valid. */
   vpa?: string;
   reason?: string;
 }
